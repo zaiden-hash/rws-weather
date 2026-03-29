@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>NY Regional Weather Service</title>
+  <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;600;700&family=Barlow+Condensed:wght@400;600;700&family=Source+Sans+3:wght@400;600&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --red: #cc0000; --red-dark: #990000;
+      --blue: #1a3a6e; --blue-mid: #1e4fa0;
+      --sky: #5b9bd5; --sky-light: #a8cce8;
+      --white: #ffffff; --off-white: #f0f4fa;
+      --text-dark: #111; --text-body: #222; --gold: #f5c518;
+    }
+    html { scroll-behavior: smooth; }
+    body { font-family: 'Source Sans 3', sans-serif; background: var(--off-white); color: var(--text-body); min-height: 100vh; }
+
+    /* HERO */
+    .hero { position: relative; background: linear-gradient(160deg, var(--blue) 0%, var(--sky) 55%, #b8d9f0 100%); padding: 24px 20px 20px; overflow: hidden; min-height: 180px; }
+    .hero::before, .hero::after { content: ''; position: absolute; background: rgba(255,255,255,0.18); border-radius: 50%; }
+    .hero::before { width: 340px; height: 200px; top: -60px; right: -60px; }
+    .hero::after  { width: 260px; height: 160px; bottom: -40px; left: 30%; }
+    .hero-inner { position: relative; z-index: 2; display: flex; align-items: center; justify-content: space-between; max-width: 960px; margin: 0 auto; gap: 16px; }
+    .logo-badge { flex-shrink: 0; width: 120px; height: 120px; border-radius: 50%; overflow: hidden; box-shadow: 0 4px 18px rgba(0,0,0,0.45); background: white; }
+    .logo-badge img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .site-title { flex: 1; text-align: center; }
+    .site-title h1 { font-family: 'Oswald', sans-serif; font-size: clamp(2rem, 6vw, 3.8rem); font-weight: 700; color: var(--red); text-transform: uppercase; line-height: 0.95; text-shadow: 2px 2px 0 rgba(0,0,0,0.3); letter-spacing: 0.02em; }
+    .site-title h2 { font-family: 'Oswald', sans-serif; font-size: clamp(1rem, 3vw, 1.8rem); font-weight: 400; color: rgba(255,255,255,0.65); text-transform: uppercase; letter-spacing: 0.18em; margin-top: 2px; }
+
+    /* DIVIDER */
+    .divider-bar { background: var(--red); height: 8px; box-shadow: 0 2px 6px rgba(0,0,0,0.35); }
+
+    /* FORECAST */
+    .forecast-section { background: var(--white); max-width: 960px; margin: 0 auto; box-shadow: 0 2px 12px rgba(0,0,0,0.12); }
+    .forecast-row { display: grid; grid-template-columns: 140px 1fr 120px; align-items: center; border-bottom: 1px solid #dde4ef; padding: 14px 24px; gap: 16px; transition: background 0.2s; animation: fadeUp 0.4s ease both; }
+    .forecast-row:hover { background: #f6f9ff; }
+    .forecast-row:last-child { border-bottom: none; }
+    .forecast-row:nth-child(1) { animation-delay: 0.05s; }
+    .forecast-row:nth-child(2) { animation-delay: 0.15s; }
+    .forecast-row:nth-child(3) { animation-delay: 0.25s; }
+    .wx-icon { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+    .wx-icon .icon-label { font-family: 'Barlow Condensed', sans-serif; font-size: 11px; font-weight: 600; text-transform: uppercase; color: var(--blue); letter-spacing: 0.06em; }
+    .icon-svg { width: 64px; height: 52px; }
+    .wx-desc { font-family: 'Source Sans 3', sans-serif; font-size: 15px; line-height: 1.5; color: var(--text-body); }
+    .wx-desc strong { color: var(--text-dark); }
+    .day-label { font-family: 'Oswald', sans-serif; font-size: clamp(2.2rem, 5vw, 3.4rem); font-weight: 700; color: var(--red); text-align: right; line-height: 1; text-transform: uppercase; }
+
+    /* DISCUSSION */
+    .discussion { background: var(--white); max-width: 960px; margin: 18px auto 0; box-shadow: 0 2px 12px rgba(0,0,0,0.1); }
+    .discussion-header { background: var(--red); padding: 10px 24px; font-family: 'Oswald', sans-serif; font-size: 1.25rem; font-weight: 600; color: var(--white); letter-spacing: 0.04em; text-transform: uppercase; }
+    .discussion-body { padding: 20px 24px; }
+    .discussion-body p { font-size: 14px; line-height: 1.65; color: #444; margin-bottom: 12px; }
+    .discussion-body p:last-child { margin-bottom: 0; }
+    .discussion-body p strong { color: var(--blue); font-weight: 600; }
+    .last-updated { font-family: 'Barlow Condensed', sans-serif; font-size: 11px; color: #aaa; text-align: right; padding: 6px 24px 10px; letter-spacing: 0.04em; }
+
+    /* FOOTER */
+    footer { background: var(--blue); margin-top: 24px; padding: 28px 20px 20px; }
+    .footer-inner { max-width: 960px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 20px; }
+    .rws-big { font-family: 'Oswald', sans-serif; font-size: 4rem; font-weight: 700; color: var(--white); line-height: 0.9; }
+    .rws-sub { font-family: 'Barlow Condensed', sans-serif; font-size: 1rem; color: var(--sky-light); letter-spacing: 0.08em; text-transform: uppercase; }
+    .footer-discord { background: #5865f2; border-radius: 10px; padding: 14px 22px; display: flex; align-items: center; gap: 12px; text-decoration: none; transition: background 0.2s, transform 0.15s; box-shadow: 0 4px 14px rgba(0,0,0,0.3); }
+    .footer-discord:hover { background: #4752c4; transform: translateY(-2px); }
+    .footer-discord svg { width: 32px; height: 32px; fill: white; }
+    .footer-discord-text { display: flex; flex-direction: column; }
+    .footer-discord-text .label { font-family: 'Oswald', sans-serif; font-size: 0.7rem; color: rgba(255,255,255,0.75); letter-spacing: 0.1em; text-transform: uppercase; }
+    .footer-discord-text .cta { font-family: 'Oswald', sans-serif; font-size: 1.1rem; font-weight: 600; color: var(--white); text-transform: uppercase; }
+    .footer-social { display: flex; flex-direction: column; gap: 8px; }
+    .social-link { display: flex; align-items: center; gap: 8px; color: var(--sky-light); text-decoration: none; font-family: 'Barlow Condensed', sans-serif; font-size: 0.95rem; letter-spacing: 0.04em; transition: color 0.2s; }
+    .social-link:hover { color: var(--white); }
+    .social-link .icon-dot { width: 22px; height: 22px; border-radius: 5px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .social-link svg { width: 14px; height: 14px; fill: white; }
+    .dot-email { background: #c0392b; } .dot-twitter { background: #000; } .dot-youtube { background: #f00; }
+    .footer-bottom { max-width: 960px; margin: 18px auto 0; border-top: 1px solid rgba(255,255,255,0.12); padding-top: 12px; font-family: 'Barlow Condensed', sans-serif; font-size: 0.82rem; color: rgba(255,255,255,0.45); letter-spacing: 0.04em; text-align: center; }
+
+    /* WRENCH BUTTON */
+    #admin-btn { position: fixed; bottom: 14px; right: 14px; width: 30px; height: 30px; background: rgba(0,0,0,0.2); border: none; border-radius: 6px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 15px; opacity: 0.3; transition: opacity 0.2s, background 0.2s; z-index: 900; }
+    #admin-btn:hover { opacity: 1; background: rgba(0,0,0,0.55); }
+
+    /* ADMIN MODAL */
+    #admin-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.65); z-index: 1000; align-items: center; justify-content: center; padding: 16px; }
+    #admin-overlay.open { display: flex; }
+    #admin-modal { background: #1a1e2e; border-radius: 12px; width: 100%; max-width: 700px; max-height: 90vh; overflow-y: auto; box-shadow: 0 20px 60px rgba(0,0,0,0.6); color: #e0e6f0; }
+    .admin-header { background: var(--red); padding: 14px 20px; border-radius: 12px 12px 0 0; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 10; }
+    .admin-header h2 { font-family: 'Oswald', sans-serif; font-size: 1.2rem; font-weight: 700; color: white; letter-spacing: 0.06em; text-transform: uppercase; }
+    .admin-close { background: none; border: none; color: rgba(255,255,255,0.7); font-size: 1.4rem; cursor: pointer; line-height: 1; padding: 2px 8px; border-radius: 4px; transition: color 0.2s; }
+    .admin-close:hover { color: white; }
+    .admin-body { padding: 20px; }
+    #login-view h3 { font-family: 'Oswald', sans-serif; font-size: 1rem; color: #8899bb; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 14px; }
+    .admin-label { font-size: 11px; font-weight: 600; color: #7a8aaa; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 4px; display: block; }
+    .admin-input { width: 100%; background: #252a3d; border: 1px solid #3a4060; border-radius: 6px; padding: 10px 12px; color: #e0e6f0; font-size: 15px; font-family: inherit; outline: none; transition: border-color 0.2s; }
+    .admin-input:focus { border-color: var(--sky); }
+    .admin-input-sm { background: #1a1e2e; border: 1px solid #3a4060; border-radius: 5px; padding: 7px 10px; color: #e0e6f0; font-size: 14px; font-family: inherit; outline: none; width: 100%; transition: border-color 0.2s; }
+    .admin-input-sm:focus { border-color: var(--sky); }
+    .admin-select { background: #1a1e2e; border: 1px solid #3a4060; border-radius: 5px; padding: 7px 10px; color: #e0e6f0; font-size: 14px; font-family: inherit; outline: none; width: 100%; cursor: pointer; transition: border-color 0.2s; }
+    .admin-select:focus { border-color: var(--sky); }
+    .admin-textarea { background: #1a1e2e; border: 1px solid #3a4060; border-radius: 5px; padding: 8px 10px; color: #e0e6f0; font-size: 13px; font-family: inherit; outline: none; width: 100%; resize: vertical; min-height: 60px; line-height: 1.5; transition: border-color 0.2s; }
+    .admin-textarea:focus { border-color: var(--sky); }
+    .admin-btn-primary { background: var(--red); color: white; border: none; border-radius: 6px; padding: 10px 22px; font-family: 'Oswald', sans-serif; font-size: 1rem; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; cursor: pointer; margin-top: 12px; transition: background 0.2s; }
+    .admin-btn-primary:hover { background: var(--red-dark); }
+    .admin-btn-primary:disabled { background: #555; cursor: not-allowed; }
+    .admin-btn-secondary { background: #2e3450; color: #aab; border: 1px solid #3a4060; border-radius: 6px; padding: 8px 16px; font-family: 'Oswald', sans-serif; font-size: 0.9rem; letter-spacing: 0.04em; text-transform: uppercase; cursor: pointer; transition: background 0.2s; margin-top: 12px; }
+    .admin-btn-secondary:hover { background: #3a4060; color: #e0e6f0; }
+    .login-error { color: #ff6b6b; font-size: 13px; margin-top: 8px; display: none; }
+    .admin-section { margin-bottom: 24px; }
+    .admin-section-title { font-family: 'Oswald', sans-serif; font-size: 0.85rem; font-weight: 600; color: var(--sky); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 12px; padding-bottom: 6px; border-bottom: 1px solid #2e3450; }
+    .fc-edit-row { background: #252a3d; border-radius: 8px; padding: 12px; margin-bottom: 10px; }
+    .fc-edit-row-top { display: grid; grid-template-columns: 70px 1fr 1fr; gap: 10px; margin-bottom: 8px; }
+    .disc-edit-block { background: #252a3d; border-radius: 8px; padding: 12px; margin-bottom: 10px; }
+    .disc-edit-top { display: grid; grid-template-columns: 1fr 2fr; gap: 10px; }
+    .gh-section { background: #1e2438; border: 1px solid #2e3a5a; border-radius: 8px; padding: 16px; }
+    .push-status { font-size: 13px; min-height: 20px; margin-top: 10px; line-height: 1.5; }
+    .push-status.ok { color: #4caf82; } .push-status.err { color: #ff6b6b; } .push-status.loading { color: #f5c518; }
+    .gh-note { font-size: 11px; color: #556677; line-height: 1.6; margin-top: 10px; }
+    .gh-note a { color: var(--sky); }
+    .chpw-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 4px; }
+    .admin-tabs { display: flex; gap: 4px; margin-bottom: 20px; flex-wrap: wrap; }
+    .admin-tab { background: #252a3d; border: none; color: #7a8aaa; font-family: 'Oswald', sans-serif; font-size: 0.82rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; padding: 7px 14px; border-radius: 5px; cursor: pointer; transition: all 0.2s; }
+    .admin-tab.active { background: var(--blue-mid); color: white; }
+    .admin-tab-panel { display: none; } .admin-tab-panel.active { display: block; }
+
+    /* RESPONSIVE */
+    @media (max-width: 600px) {
+      .forecast-row { grid-template-columns: 90px 1fr 80px; padding: 10px 12px; }
+      .wx-desc { font-size: 13px; }
+      .logo-badge { width: 80px; height: 80px; }
+      .footer-inner { justify-content: center; text-align: center; }
+      .fc-edit-row-top { grid-template-columns: 60px 1fr; }
+      .fc-edit-row-top > *:last-child { grid-column: 1 / -1; }
+      .disc-edit-top { grid-template-columns: 1fr; }
+      .chpw-row { grid-template-columns: 1fr; }
+    }
+    @keyframes fadeUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+  </style>
+</head>
+<body>
+
+<!-- HERO -->
+<header class="hero">
+  <div class="hero-inner">
+    <div class="logo-badge">
+      <img src="logo.png" alt="Regional Weather Service logo"/>
+    </div>
+    <div class="site-title">
+      <h1>New York</h1>
+      <h2>Regional Weather Service</h2>
+    </div>
+    <svg width="90" height="70" viewBox="0 0 90 70" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" style="opacity:0.22;flex-shrink:0;">
+      <ellipse cx="45" cy="45" rx="42" ry="24" fill="white"/>
+      <ellipse cx="30" cy="38" rx="22" ry="18" fill="white"/>
+      <ellipse cx="58" cy="34" rx="20" ry="16" fill="white"/>
+      <ellipse cx="45" cy="30" rx="18" ry="14" fill="white"/>
+    </svg>
+  </div>
+</header>
+
+<div class="divider-bar"></div>
+
+<!-- FORECAST (rendered by JS) -->
+<section class="forecast-section" id="forecast-section" aria-label="3-Day Forecast"></section>
+
+<!-- DISCUSSION (rendered by JS) -->
+<section class="discussion" id="discussion-section" aria-label="Forecaster Discussion">
+  <div class="discussion-header">Today's Forecasters Discussion</div>
+  <div class="discussion-body" id="discussion-body"></div>
+  <div class="last-updated" id="last-updated"></div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-inner">
+    <div>
+      <div style="display:flex;align-items:center;gap:14px;">
+        <img src="logo.png" alt="RWS Logo" style="width:70px;height:70px;border-radius:50%;box-shadow:0 3px 10px rgba(0,0,0,0.4);flex-shrink:0;"/>
+        <div>
+          <span class="rws-big">RWS</span><br>
+          <span class="rws-sub">Albany, NY</span>
+        </div>
+      </div>
+    </div>
+    <a href="https://discord.gg/jJhcxF4yGg" class="footer-discord" target="_blank" rel="noopener noreferrer" aria-label="Join our Discord">
+      <svg viewBox="0 0 127.14 96.36" xmlns="http://www.w3.org/2000/svg" fill="white">
+        <path d="M107.7 8.07A105.15 105.15 0 0 0 81.47 0a72.06 72.06 0 0 0-3.36 6.83 97.68 97.68 0 0 0-29.11 0A72.37 72.37 0 0 0 45.64 0a105.89 105.89 0 0 0-26.25 8.09C2.79 32.65-1.71 56.6.54 80.21a105.73 105.73 0 0 0 32.17 16.15 77.7 77.7 0 0 0 6.89-11.11 68.42 68.42 0 0 1-10.85-5.18c.91-.66 1.8-1.34 2.66-2a75.57 75.57 0 0 0 64.32 0c.87.71 1.76 1.39 2.66 2a68.68 68.68 0 0 1-10.87 5.19 77 77 0 0 0 6.89 11.1 105.25 105.25 0 0 0 32.19-16.14c2.64-27.38-4.51-51.11-18.9-72.15zM42.45 65.69C36.18 65.69 31 60 31 53s5-12.74 11.43-12.74S54 46 53.89 53s-5.05 12.69-11.44 12.69zm42.24 0C78.41 65.69 73.25 60 73.25 53s5-12.74 11.44-12.74S96.23 46 96.12 53s-5.04 12.69-11.43 12.69z"/>
+      </svg>
+      <div class="footer-discord-text">
+        <span class="label">Get the latest forecasts as they drop</span>
+        <span class="cta">Join our Discord</span>
+      </div>
+    </a>
+    <div class="footer-social">
+      <a href="/cdn-cgi/l/email-protection#057772766a63636c666068646b456268646c692b666a68" class="social-link">
+        <span class="icon-dot dot-email">
+          <svg viewBox="0 0 24 24"><path d="M20 4H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2zm0 4-8 5-8-5V6l8 5 8-5v2z"/></svg>
+        </span>
+        <span class="__cf_email__" data-cfemail="790b0e0a161f1f101a1c141817391e14181015571a1614">[email&#160;protected]</span>
+      </a>
+      <a href="https://x.com/rwsweather" class="social-link" target="_blank" rel="noopener noreferrer">
+        <span class="icon-dot dot-twitter">
+          <svg viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+        </span>
+        @rwsweather
+      </a>
+      <a href="https://www.youtube.com/@RWSWeather" class="social-link" target="_blank" rel="noopener noreferrer">
+        <span class="icon-dot dot-youtube">
+          <svg viewBox="0 0 24 24"><path d="M23.5 6.2a3 3 0 0 0-2.1-2.1C19.5 3.5 12 3.5 12 3.5s-7.5 0-9.4.6a3 3 0 0 0-2.1 2.1C0 8.1 0 12 0 12s0 3.9.5 5.8A3 3 0 0 0 2.6 20c1.9.6 9.4.6 9.4.6s7.5 0 9.4-.6a3 3 0 0 0 2.1-2.2c.5-1.9.5-5.8.5-5.8s0-3.9-.5-5.8zm-14 9.4V8.4l6.3 3.6-6.3 3.6z"/></svg>
+        </span>
+        @RWSWeather
+      </a>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    Hosted by RWS Albany &nbsp;&middot;&nbsp; Not an official National Weather Service product &nbsp;&middot;&nbsp; For entertainment purposes only
+  </div>
+</footer>
+
+<!-- WRENCH BUTTON -->
+<button id="admin-btn" title="Forecaster Login" aria-label="Forecaster Login">&#x1F527;</button>
+
+<!-- ADMIN MODAL -->
+<div id="admin-overlay" role="dialog" aria-modal="true" aria-label="Forecaster Admin Panel">
+  <div id="admin-modal">
+    <div class="admin-header">
+      <h2>&#x1F527; Forecaster Panel</h2>
+      <button class="admin-close" id="admin-close" aria-label="Close">&#x2715;</button>
+    </div>
+    <div class="admin-body">
+
+      <!-- LOGIN -->
+      <div id="login-view">
+        <h3>Forecaster Login</h3>
+        <label class="admin-label" for="pw-input">Password</label>
+        <input class="admin-input" type="password" id="pw-input" placeholder="Enter password" autocomplete="current-password"/>
+        <div class="login-error" id="login-error">Incorrect password. Try again.</div>
+        <br><button class="admin-btn-primary" id="login-btn">Log In</button>
+      </div>
+
+      <!-- EDITOR -->
+      <div id="editor-view" style="display:none;">
+        <div class="admin-tabs">
+          <button class="admin-tab active" data-tab="forecast">Forecast</button>
+          <button class="admin-tab" data-tab="discussion">Discussion</button>
+          <button class="admin-tab" data-tab="github">Push to GitHub</button>
+          <button class="admin-tab" data-tab="settings">Settings</button>
+        </div>
+
+        <!-- TAB: FORECAST -->
+        <div class="admin-tab-panel active" id="tab-forecast">
+          <div class="admin-section">
+            <div class="admin-section-title">3-Day Forecast Rows</div>
+            <div id="fc-editor"></div>
+          </div>
+          <button class="admin-btn-primary" id="save-forecast-btn">Save &amp; Preview</button>
+        </div>
+
+        <!-- TAB: DISCUSSION -->
+        <div class="admin-tab-panel" id="tab-discussion">
+          <div class="admin-section">
+            <div class="admin-section-title">Discussion Paragraphs</div>
+            <div id="disc-editor"></div>
+          </div>
+          <button class="admin-btn-primary" id="save-disc-btn">Save &amp; Preview</button>
+        </div>
+
+        <!-- TAB: PUSH TO GITHUB -->
+        <div class="admin-tab-panel" id="tab-github">
+          <div class="admin-section">
+            <div class="admin-section-title">Push Update to GitHub</div>
+            <div class="gh-section">
+              <p style="font-size:13px;color:#aab;margin-bottom:14px;line-height:1.6;">
+                Enter your GitHub Personal Access Token to commit the latest forecast directly to
+                <strong style="color:#e0e6f0;">zaiden-hash/rws-weather</strong>.
+                The token is saved only in your browser.
+              </p>
+              <label class="admin-label" for="gh-token">GitHub Personal Access Token</label>
+              <input class="admin-input-sm" type="password" id="gh-token" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx" autocomplete="off" style="margin-bottom:12px;"/>
+              <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;">
+                <button class="admin-btn-primary" id="push-btn" style="margin-top:0;">&#x1F680; Push to GitHub</button>
+                <button class="admin-btn-secondary" id="save-token-btn" style="margin-top:0;">Save Token</button>
+              </div>
+              <div class="push-status" id="push-status"></div>
+              <div class="gh-note">
+                Token needs <strong>repo</strong> (or <strong>contents: write</strong>) scope.
+                Generate one at <a href="https://github.com/settings/tokens" target="_blank" rel="noopener">github.com/settings/tokens</a>.
+                Click <em>Save &amp; Preview</em> on the other tabs first before pushing.
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- TAB: SETTINGS -->
+        <div class="admin-tab-panel" id="tab-settings">
+          <div class="admin-section">
+            <div class="admin-section-title">Change Password</div>
+            <div class="chpw-row">
+              <div>
+                <label class="admin-label" for="new-pw1">New Password</label>
+                <input class="admin-input-sm" type="password" id="new-pw1" placeholder="New password" autocomplete="new-password"/>
+              </div>
+              <div>
+                <label class="admin-label" for="new-pw2">Confirm Password</label>
+                <input class="admin-input-sm" type="password" id="new-pw2" placeholder="Confirm" autocomplete="new-password"/>
+              </div>
+            </div>
+            <button class="admin-btn-primary" id="change-pw-btn">Update Password</button>
+            <div class="push-status" id="pw-status"></div>
+          </div>
+          <div class="admin-section">
+            <div class="admin-section-title">Session</div>
+            <button class="admin-btn-secondary" id="logout-btn">Log Out</button>
+          </div>
+        </div>
+
+      </div><!-- /editor-view -->
+    </div>
+  </div>
+</div>
+
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+// =====================================================
+//  FORECAST DATA  — updated by admin panel + GitHub push
+// =====================================================
+/* RWS_DATA_START */
+const DEFAULT_DATA = {
+  "rows": [
+    { "day": "SAT", "icon": "partly-cloudy", "iconLabel": "Partly Cloudy",
+      "desc": "Isolated snow showers after 2pm. Mostly sunny, with a high near 40. West wind 8 to 16 mph, with gusts as high as **30 mph**. Chance of precipitation is 20%." },
+    { "day": "SUN", "icon": "partly-sunny", "iconLabel": "Mostly Sunny",
+      "desc": "Partly sunny, with a high near **51**. South wind 8 to 14 mph." },
+    { "day": "MON", "icon": "sunny", "iconLabel": "Mostly Sunny",
+      "desc": "Partly sunny, with a high near **61**." }
+  ],
+  "discussion": [
+    { "label": "SHORT TERM (Tonight through Sunday)",
+      "body": "A fast-moving shortwave trough will clip the region late this afternoon, bringing a brief period of light snow showers primarily across the higher terrain before 4 PM. Temperatures will drop through the 30s overnight with northwest winds gusting to near 30 mph. Wind chills as low as 20\u00b0F are possible by early Sunday morning." },
+    { "label": "SUNDAY",
+      "body": "High pressure builds from the west, bringing a pleasant partly sunny day with temperatures rebounding into the lower 50s. South winds at 8 to 14 mph will moderate through the afternoon. Skies clear overnight as the high shifts offshore." },
+    { "label": "LONG TERM (Monday onward)",
+      "body": "Above-normal temperatures expected Monday as a strong southerly flow develops ahead of the next approaching system. Highs reach the low 60s, near 15 degrees above the seasonal average for late March. A cold front will arrive by Tuesday, bringing the chance of showers. Temperatures return to seasonable values for mid-week." },
+    { "label": "Aviation",
+      "body": "VFR conditions expected through the period. Isolated MVFR ceilings possible Saturday evening across northern stations during the snow shower activity. Winds remain gusty Saturday, diminishing overnight." }
+  ],
+  "lastUpdated": ""
+};
+/* RWS_DATA_END */
+
+// Load from localStorage (overrides defaults after a push)
+let DATA = JSON.parse(JSON.stringify(DEFAULT_DATA));
+try { const s = localStorage.getItem("rws_forecast_data"); if (s) DATA = JSON.parse(s); } catch(e) {}
+
+// ── SVG ICONS ─────────────────────────────────────
+function iconSVG(type) {
+  const icons = {
+    sunny:`<svg class="icon-svg" viewBox="0 0 64 52" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><g stroke="#f5a623" stroke-width="2.2" stroke-linecap="round"><line x1="32" y1="4" x2="32" y2="10"/><line x1="32" y1="38" x2="32" y2="44"/><line x1="4" y1="24" x2="10" y2="24"/><line x1="54" y1="24" x2="60" y2="24"/><line x1="11" y1="8" x2="15" y2="12"/><line x1="49" y1="8" x2="45" y2="12"/><line x1="11" y1="40" x2="15" y2="36"/><line x1="49" y1="40" x2="45" y2="36"/></g><circle cx="32" cy="24" r="12" fill="#f5c518" stroke="#f5a623" stroke-width="1.5"/></svg>`,
+    "partly-sunny":`<svg class="icon-svg" viewBox="0 0 64 52" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><g stroke="#f5a623" stroke-width="2" stroke-linecap="round"><line x1="20" y1="4" x2="20" y2="8"/><line x1="20" y1="28" x2="20" y2="32"/><line x1="6" y1="16" x2="2" y2="16"/><line x1="34" y1="16" x2="38" y2="16"/><line x1="9" y1="7" x2="6" y2="4"/><line x1="31" y1="7" x2="34" y2="4"/><line x1="9" y1="25" x2="6" y2="28"/><line x1="31" y1="25" x2="34" y2="28"/></g><circle cx="20" cy="18" r="8" fill="#f5c518"/><ellipse cx="40" cy="36" rx="18" ry="10" fill="white" stroke="#9db8d2" stroke-width="1.5"/><ellipse cx="30" cy="30" rx="9" ry="7" fill="white" stroke="#9db8d2" stroke-width="1.5"/><ellipse cx="46" cy="29" rx="10" ry="8" fill="white" stroke="#9db8d2" stroke-width="1.5"/></svg>`,
+    "partly-cloudy":`<svg class="icon-svg" viewBox="0 0 64 52" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><g stroke="#f5a623" stroke-width="2" stroke-linecap="round"><line x1="20" y1="4" x2="20" y2="8"/><line x1="20" y1="26" x2="20" y2="30"/><line x1="6" y1="15" x2="2" y2="15"/><line x1="34" y1="15" x2="38" y2="15"/><line x1="9" y1="6" x2="6" y2="3"/><line x1="31" y1="6" x2="34" y2="3"/><line x1="9" y1="24" x2="6" y2="27"/><line x1="31" y1="24" x2="34" y2="27"/></g><circle cx="20" cy="16" r="8" fill="#f5c518" opacity="0.75"/><ellipse cx="38" cy="36" rx="20" ry="11" fill="white" stroke="#9db8d2" stroke-width="1.5"/><ellipse cx="26" cy="31" rx="11" ry="9" fill="white" stroke="#9db8d2" stroke-width="1.5"/><ellipse cx="44" cy="29" rx="11" ry="9" fill="white" stroke="#9db8d2" stroke-width="1.5"/></svg>`,
+    cloudy:`<svg class="icon-svg" viewBox="0 0 64 52" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><ellipse cx="34" cy="34" rx="24" ry="13" fill="#c8d8e8" stroke="#9db8d2" stroke-width="1.5"/><ellipse cx="22" cy="28" rx="13" ry="11" fill="#c8d8e8" stroke="#9db8d2" stroke-width="1.5"/><ellipse cx="40" cy="25" rx="14" ry="11" fill="#c8d8e8" stroke="#9db8d2" stroke-width="1.5"/><ellipse cx="32" cy="22" rx="12" ry="10" fill="#c8d8e8" stroke="#9db8d2" stroke-width="1.5"/></svg>`,
+    rainy:`<svg class="icon-svg" viewBox="0 0 64 52" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><ellipse cx="34" cy="26" rx="22" ry="11" fill="#94adc4" stroke="#7a9ab8" stroke-width="1.5"/><ellipse cx="22" cy="22" rx="12" ry="9" fill="#94adc4" stroke="#7a9ab8" stroke-width="1.5"/><ellipse cx="42" cy="20" rx="13" ry="10" fill="#94adc4" stroke="#7a9ab8" stroke-width="1.5"/><g stroke="#5b9bd5" stroke-width="2" stroke-linecap="round"><line x1="22" y1="40" x2="19" y2="48"/><line x1="32" y1="40" x2="29" y2="48"/><line x1="42" y1="40" x2="39" y2="48"/></g></svg>`,
+    snowy:`<svg class="icon-svg" viewBox="0 0 64 52" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><ellipse cx="34" cy="24" rx="22" ry="11" fill="#d0dce8" stroke="#b0c4d4" stroke-width="1.5"/><ellipse cx="22" cy="20" rx="12" ry="9" fill="#d0dce8" stroke="#b0c4d4" stroke-width="1.5"/><ellipse cx="42" cy="18" rx="13" ry="10" fill="#d0dce8" stroke="#b0c4d4" stroke-width="1.5"/><text x="18" y="47" fill="#90b0cc" font-size="11" text-anchor="middle">&#x2744;</text><text x="32" y="49" fill="#90b0cc" font-size="11" text-anchor="middle">&#x2744;</text><text x="46" y="47" fill="#90b0cc" font-size="11" text-anchor="middle">&#x2744;</text></svg>`,
+    stormy:`<svg class="icon-svg" viewBox="0 0 64 52" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><ellipse cx="34" cy="22" rx="22" ry="12" fill="#5a6070" stroke="#404858" stroke-width="1.5"/><ellipse cx="22" cy="18" rx="12" ry="10" fill="#5a6070" stroke="#404858" stroke-width="1.5"/><ellipse cx="42" cy="16" rx="13" ry="10" fill="#5a6070" stroke="#404858" stroke-width="1.5"/><polyline points="34,34 28,43 33,43 27,52" stroke="#f5c518" stroke-width="2.2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>`
+  };
+  return icons[type] || icons["partly-cloudy"];
+}
+
+function md(s){ return s.replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>'); }
+
+function renderForecast(){
+  document.getElementById("forecast-section").innerHTML = DATA.rows.map(r=>`
+    <div class="forecast-row">
+      <div class="wx-icon">${iconSVG(r.icon)}<span class="icon-label">${r.iconLabel}</span></div>
+      <div class="wx-desc">${md(r.desc)}</div>
+      <div class="day-label">${r.day}</div>
+    </div>`).join("");
+}
+
+function renderDiscussion(){
+  document.getElementById("discussion-body").innerHTML =
+    DATA.discussion.map(p=>`<p><strong>${p.label}:</strong> ${p.body}</p>`).join("");
+  const lu = document.getElementById("last-updated");
+  lu.textContent = DATA.lastUpdated ? "Last updated: "+DATA.lastUpdated : "";
+}
+
+renderForecast();
+renderDiscussion();
+
+// =====================================================
+//  ADMIN PANEL
+// =====================================================
+async function sha256(str){
+  const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(str));
+  return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,"0")).join("");
+}
+// Default password hash for "RWSforecaster"
+const DEFAULT_HASH = "1e4462d180b4afeb27c265227d6db977067939d78c346c576c3acb3fc0609161";
+function getHash(){ return localStorage.getItem("rws_pw_hash") || DEFAULT_HASH; }
+
+// Open / Close
+document.getElementById("admin-btn").onclick = ()=>{
+  document.getElementById("admin-overlay").classList.add("open");
+  setTimeout(()=>document.getElementById("pw-input").focus(),50);
+};
+document.getElementById("admin-close").onclick = closeModal;
+document.getElementById("admin-overlay").onclick = e=>{ if(e.target===e.currentTarget) closeModal(); };
+document.addEventListener("keydown", e=>{ if(e.key==="Escape") closeModal(); });
+function closeModal(){ document.getElementById("admin-overlay").classList.remove("open"); }
+
+// Login
+document.getElementById("login-btn").onclick = doLogin;
+document.getElementById("pw-input").addEventListener("keydown",e=>{ if(e.key==="Enter") doLogin(); });
+
+async function doLogin(){
+  const hash = await sha256(document.getElementById("pw-input").value);
+  if(hash === getHash()){
+    document.getElementById("login-view").style.display="none";
+    document.getElementById("editor-view").style.display="block";
+    document.getElementById("login-error").style.display="none";
+    document.getElementById("pw-input").value="";
+    buildEditors();
+    loadToken();
+  } else {
+    document.getElementById("login-error").style.display="block";
+    document.getElementById("pw-input").select();
+  }
+}
+
+// Tabs
+document.querySelectorAll(".admin-tab").forEach(tab=>{
+  tab.onclick=()=>{
+    document.querySelectorAll(".admin-tab").forEach(t=>t.classList.remove("active"));
+    document.querySelectorAll(".admin-tab-panel").forEach(p=>p.classList.remove("active"));
+    tab.classList.add("active");
+    document.getElementById("tab-"+tab.dataset.tab).classList.add("active");
+  };
+});
+
+// Icon options
+const ICONS = [["sunny","Sunny"],["partly-sunny","Partly Sunny"],["partly-cloudy","Partly Cloudy"],
+               ["cloudy","Cloudy"],["rainy","Rainy"],["snowy","Snowy"],["stormy","Stormy"]];
+
+function buildEditors(){
+  // Forecast editor
+  document.getElementById("fc-editor").innerHTML = DATA.rows.map((r,i)=>`
+    <div class="fc-edit-row">
+      <div class="fc-edit-row-top">
+        <div>
+          <label class="admin-label" for="fc-day-${i}">Day</label>
+          <input class="admin-input-sm" id="fc-day-${i}" value="${r.day}" maxlength="3"/>
+        </div>
+        <div>
+          <label class="admin-label" for="fc-icon-${i}">Icon</label>
+          <select class="admin-select" id="fc-icon-${i}">
+            ${ICONS.map(([v,l])=>`<option value="${v}"${v===r.icon?" selected":""}>${l}</option>`).join("")}
+          </select>
+        </div>
+        <div>
+          <label class="admin-label" for="fc-iconlabel-${i}">Icon Label</label>
+          <input class="admin-input-sm" id="fc-iconlabel-${i}" value="${r.iconLabel}"/>
+        </div>
+      </div>
+      <label class="admin-label">Description &nbsp;<span style="color:#445;font-weight:400;">**text** = bold</span></label>
+      <textarea class="admin-textarea" id="fc-desc-${i}" rows="3">${r.desc}</textarea>
+    </div>`).join("");
+
+  // Discussion editor
+  document.getElementById("disc-editor").innerHTML = DATA.discussion.map((p,i)=>`
+    <div class="disc-edit-block">
+      <div class="disc-edit-top">
+        <div>
+          <label class="admin-label" for="disc-label-${i}">Section Label</label>
+          <input class="admin-input-sm" id="disc-label-${i}" value="${p.label}"/>
+        </div>
+        <div>
+          <label class="admin-label" for="disc-body-${i}">Body Text</label>
+          <textarea class="admin-textarea" id="disc-body-${i}" rows="4">${p.body}</textarea>
+        </div>
+      </div>
+    </div>`).join("");
+}
+
+// Save forecast
+document.getElementById("save-forecast-btn").onclick=()=>{
+  DATA.rows = DATA.rows.map((_,i)=>({
+    day: document.getElementById(`fc-day-${i}`).value.toUpperCase(),
+    icon: document.getElementById(`fc-icon-${i}`).value,
+    iconLabel: document.getElementById(`fc-iconlabel-${i}`).value,
+    desc: document.getElementById(`fc-desc-${i}`).value
+  }));
+  stamp(); save(); renderForecast(); flash("save-forecast-btn","&#x2713; Saved!");
+};
+
+// Save discussion
+document.getElementById("save-disc-btn").onclick=()=>{
+  DATA.discussion = DATA.discussion.map((_,i)=>({
+    label: document.getElementById(`disc-label-${i}`).value,
+    body: document.getElementById(`disc-body-${i}`).value
+  }));
+  stamp(); save(); renderDiscussion(); flash("save-disc-btn","&#x2713; Saved!");
+};
+
+function stamp(){
+  DATA.lastUpdated = new Date().toLocaleString("en-US",{month:"short",day:"numeric",year:"numeric",hour:"2-digit",minute:"2-digit",timeZoneName:"short"});
+}
+function save(){ try{ localStorage.setItem("rws_forecast_data", JSON.stringify(DATA)); }catch(e){} }
+function flash(id,msg){
+  const b=document.getElementById(id), orig=b.innerHTML;
+  b.innerHTML=msg; setTimeout(()=>b.innerHTML=orig,2000);
+}
+
+// GitHub token
+function loadToken(){ document.getElementById("gh-token").value = localStorage.getItem("rws_gh_token")||""; }
+document.getElementById("save-token-btn").onclick=()=>{
+  localStorage.setItem("rws_gh_token", document.getElementById("gh-token").value.trim());
+  setStatus("push-status","Token saved to browser.","ok");
+};
+
+// GitHub push
+document.getElementById("push-btn").onclick = pushToGitHub;
+
+async function pushToGitHub(){
+  const token = document.getElementById("gh-token").value.trim();
+  if(!token){ setStatus("push-status","Please enter a GitHub token first.","err"); return; }
+
+  const btn = document.getElementById("push-btn");
+  btn.disabled = true;
+  setStatus("push-status","Fetching current file from GitHub...","loading");
+
+  const API = "https://api.github.com/repos/zaiden-hash/rws-weather/contents/index.html";
+  const HDR = { "Authorization":"Bearer "+token, "Accept":"application/vnd.github+json", "Content-Type":"application/json" };
+
+  try {
+    const getRes = await fetch(API, { headers: HDR });
+    if(!getRes.ok) throw new Error("GitHub API: "+getRes.status+" "+getRes.statusText);
+    const info = await getRes.json();
+
+    const currentHTML = decodeURIComponent(escape(atob(info.content.replace(/\n/g,""))));
+    const newBlock = "/* RWS_DATA_START */\nconst DEFAULT_DATA = "+JSON.stringify(DATA,null,2)+";\n/* RWS_DATA_END */";
+    const updated = currentHTML.replace(/\/\* RWS_DATA_START \*\/[\s\S]*?\/\* RWS_DATA_END \*\//, newBlock);
+
+    if(updated === currentHTML) throw new Error("Could not locate data block. Was the file modified outside the panel?");
+
+    setStatus("push-status","Pushing update to GitHub...","loading");
+    const newContent = btoa(unescape(encodeURIComponent(updated)));
+    const ts = new Date().toLocaleString("en-US",{month:"short",day:"numeric",hour:"2-digit",minute:"2-digit"});
+
+    const putRes = await fetch(API,{
+      method:"PUT", headers:HDR,
+      body: JSON.stringify({ message:"Forecast update \u2014 "+ts, content:newContent, sha:info.sha })
+    });
+    if(!putRes.ok){ const e=await putRes.json(); throw new Error(e.message||putRes.status); }
+
+    setStatus("push-status","\u2705 Pushed! GitHub Pages will update in ~1 minute.","ok");
+    localStorage.setItem("rws_gh_token",token);
+  } catch(e){
+    setStatus("push-status","\u274C "+e.message,"err");
+  }
+  btn.disabled = false;
+}
+
+function setStatus(id,msg,type){
+  const el=document.getElementById(id);
+  el.innerHTML=msg; el.className="push-status "+(type||"");
+}
+
+// Change password
+document.getElementById("change-pw-btn").onclick=async()=>{
+  const p1=document.getElementById("new-pw1").value;
+  const p2=document.getElementById("new-pw2").value;
+  if(!p1){ setStatus("pw-status","Enter a new password.","err"); return; }
+  if(p1!==p2){ setStatus("pw-status","Passwords don't match.","err"); return; }
+  if(p1.length<6){ setStatus("pw-status","Must be at least 6 characters.","err"); return; }
+  localStorage.setItem("rws_pw_hash", await sha256(p1));
+  document.getElementById("new-pw1").value="";
+  document.getElementById("new-pw2").value="";
+  setStatus("pw-status","\u2705 Password updat
