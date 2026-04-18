@@ -737,26 +737,141 @@
 /* RWS_DATA_START */
 const DEFAULT_DATA = {
   "rows": [
-    {"day":"SAT","icon":"partly-cloudy","iconLabel":"Partly Cloudy","hi":"40","lo":"28","pop":"20","wind":"W 8-16G30","night":"Mostly clear and cold.","desc":"Isolated snow showers after 2pm. Mostly sunny, with a high near **40**. West wind 8 to 16 mph, with gusts as high as **30 mph**. Chance of precipitation is 20%."},
-    {"day":"SUN","icon":"partly-sunny","iconLabel":"Mostly Sunny","hi":"51","lo":"35","pop":"10","wind":"S 8-14","night":"Mostly clear. Low around 35.","desc":"Partly sunny, with a high near **51**. South wind 8 to 14 mph."},
-    {"day":"MON","icon":"sunny","iconLabel":"Mostly Sunny","hi":"61","lo":"42","pop":"0","wind":"SW 5-10","night":"Partly cloudy. Low around 42.","desc":"Partly sunny, with a high near **61**."},
-    {"day":"TUE","icon":"partly-cloudy","iconLabel":"Partly Cloudy","hi":"58","lo":"44","pop":"30","wind":"S 10-15","night":"Showers likely. Low around 44.","desc":"Chance of showers. Partly cloudy, with a high near **58**."},
-    {"day":"WED","icon":"rainy","iconLabel":"Rainy","hi":"52","lo":"38","pop":"70","wind":"NE 10-20","night":"Rain ending. Low around 38.","desc":"Showers likely. Mostly cloudy, with a high near **52**. Chance of precipitation is 70%."},
-    {"day":"THU","icon":"cloudy","iconLabel":"Mostly Cloudy","hi":"48","lo":"34","pop":"20","wind":"NW 8-12","night":"Partly cloudy. Low around 34.","desc":"Mostly cloudy, with a high near **48**."},
-    {"day":"FRI","icon":"partly-sunny","iconLabel":"Partly Sunny","hi":"55","lo":"40","pop":"10","wind":"W 5-10","night":"Clear. Low around 40.","desc":"Partly sunny, with a high near **55**."}
+    {
+      "day": "SAT",
+      "icon": "partly-cloudy",
+      "iconLabel": "Partly Cloudy",
+      "hi": "40",
+      "lo": "28",
+      "pop": "20",
+      "wind": "W 8-16G30",
+      "night": "Mostly clear and cold.",
+      "desc": "Isolated snow showers after 2pm. Mostly sunny, with a high near **40**. West wind 8 to 16 mph, with gusts as high as **30 mph**. Chance of precipitation is 20%."
+    },
+    {
+      "day": "SUN",
+      "icon": "partly-sunny",
+      "iconLabel": "Mostly Sunny",
+      "hi": "51",
+      "lo": "35",
+      "pop": "10",
+      "wind": "S 8-14",
+      "night": "Mostly clear. Low around 35.",
+      "desc": "Partly sunny, with a high near **51**. South wind 8 to 14 mph."
+    },
+    {
+      "day": "MON",
+      "icon": "sunny",
+      "iconLabel": "Mostly Sunny",
+      "hi": "61",
+      "lo": "42",
+      "pop": "0",
+      "wind": "SW 5-10",
+      "night": "Partly cloudy. Low around 42.",
+      "desc": "Partly sunny, with a high near **61**."
+    },
+    {
+      "day": "TUE",
+      "icon": "partly-cloudy",
+      "iconLabel": "Partly Cloudy",
+      "hi": "58",
+      "lo": "44",
+      "pop": "30",
+      "wind": "S 10-15",
+      "night": "Showers likely. Low around 44.",
+      "desc": "Chance of showers. Partly cloudy, with a high near **58**."
+    },
+    {
+      "day": "WED",
+      "icon": "rainy",
+      "iconLabel": "Rainy",
+      "hi": "52",
+      "lo": "38",
+      "pop": "70",
+      "wind": "NE 10-20",
+      "night": "Rain ending. Low around 38.",
+      "desc": "Showers likely. Mostly cloudy, with a high near **52**. Chance of precipitation is 70%."
+    },
+    {
+      "day": "THU",
+      "icon": "cloudy",
+      "iconLabel": "Mostly Cloudy",
+      "hi": "48",
+      "lo": "34",
+      "pop": "20",
+      "wind": "NW 8-12",
+      "night": "Partly cloudy. Low around 34.",
+      "desc": "Mostly cloudy, with a high near **48**."
+    },
+    {
+      "day": "FRI",
+      "icon": "partly-sunny",
+      "iconLabel": "Partly Sunny",
+      "hi": "55",
+      "lo": "40",
+      "pop": "10",
+      "wind": "W 5-10",
+      "night": "Clear. Low around 40.",
+      "desc": "Partly sunny, with a high near **55**."
+    }
   ],
   "discussion": [
-    {"label":"SHORT TERM (Tonight through Sunday)","body":"A fast-moving shortwave trough will clip the region late this afternoon, bringing a brief period of light snow showers primarily across the higher terrain before 4 PM. Temperatures will drop through the 30s overnight with northwest winds gusting to near 30 mph. Wind chills as low as 20\u00b0F are possible by early Sunday morning."},
-    {"label":"SUNDAY","body":"High pressure builds from the west, bringing a pleasant partly sunny day with temperatures rebounding into the lower 50s. South winds at 8 to 14 mph will moderate through the afternoon. Skies clear overnight as the high shifts offshore."},
-    {"label":"LONG TERM (Monday onward)","body":"Above-normal temperatures expected Monday as a strong southerly flow develops ahead of the next approaching system. Highs reach the low 60s. A cold front will arrive by Tuesday, bringing the chance of showers. Temperatures return to seasonable values for mid-week."},
-    {"label":"Aviation","body":"VFR conditions expected through the period. Isolated MVFR ceilings possible Saturday evening across northern stations during the snow shower activity. Winds remain gusty Saturday, diminishing overnight."}
+    {
+      "label": "SHORT TERM (Tonight through Sunday)",
+      "body": "A fast-moving shortwave trough will clip the region late this afternoon, bringing a brief period of light snow showers primarily across the higher terrain before 4 PM. Temperatures will drop through the 30s overnight with northwest winds gusting to near 30 mph. Wind chills as low as 20°F are possible by early Sunday morning."
+    },
+    {
+      "label": "SUNDAY",
+      "body": "High pressure builds from the west, bringing a pleasant partly sunny day with temperatures rebounding into the lower 50s. South winds at 8 to 14 mph will moderate through the afternoon. Skies clear overnight as the high shifts offshore."
+    },
+    {
+      "label": "LONG TERM (Monday onward)",
+      "body": "Above-normal temperatures expected Monday as a strong southerly flow develops ahead of the next approaching system. Highs reach the low 60s. A cold front will arrive by Tuesday, bringing the chance of showers. Temperatures return to seasonable values for mid-week."
+    },
+    {
+      "label": "Aviation",
+      "body": "VFR conditions expected through the period. Isolated MVFR ceilings possible Saturday evening across northern stations during the snow shower activity. Winds remain gusty Saturday, diminishing overnight."
+    }
   ],
-  "about": "",
-  "banner": {"enabled":false,"text":"","color":"#cc0000"},
-  "outlookCaptions": {"1":"","2":"","3":""},
-  "photoMeta": [{"caption":"","credit":""},{"caption":"","credit":""},{"caption":"","credit":""}],
-  "lastUpdated": "",
-  "branding": {}
+  "about": "Welcome to the Regional Weather Service in Albany, NY.",
+  "banner": {
+    "enabled": true,
+    "text": "UPDATE RELEASED! NEW CONDITIONS SECTION, SETTINGS, OUTLOOK, ABOUT US,  WEBSITE DESIGN, AND FORECASTERS SECTION",
+    "color": "#1a7a3a"
+  },
+  "outlookCaptions": {
+    "1": "GeoJSON: day1otlk_20260418_2000_cat.lyr.geojson",
+    "2": "",
+    "3": ""
+  },
+  "photoMeta": [
+    {
+      "caption": "",
+      "credit": ""
+    },
+    {
+      "caption": "",
+      "credit": ""
+    },
+    {
+      "caption": "",
+      "credit": ""
+    }
+  ],
+  "lastUpdated": "Apr 18, 2026, 07:03 PM EDT",
+  "branding": {
+    "title": "New York",
+    "subtitle": "Regional Weather Service",
+    "city": "Albany, NY",
+    "email": "rwsofficemain@gmail.com",
+    "twitter": "rwsweather",
+    "youtube": "@RWSWeather",
+    "discordUrl": "https://discord.gg/jJhcxF4yGg",
+    "discordCta": "Join our Discord",
+    "footerNote": "Hosted by RWS Albany &middot; Not an official National Weather Service product &middot; For educational purposes only",
+    "soundingTitle": "Sounding Data",
+    "soundingDesc": "Upper-air weather balloon soundings coming soon to RWS..."
+  }
 };
 /* RWS_DATA_END */
 
